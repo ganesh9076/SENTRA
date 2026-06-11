@@ -1,0 +1,39 @@
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background 0.25s, color 0.25s;
+}
+a { text-decoration: none; color: var(--accent); }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* ── ANIMATIONS ── */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── UTILITY ── */
+.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); }
+.mb16 { margin-bottom: 16px; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+/* ── TERMINAL ── */
+.terminal {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  max-height: 200px; overflow-y: auto;
+  line-height: 1.9; color: var(--text2);
+}
+.terminal::-webkit-scrollbar { width: 3px; }
+.terminal::-webkit-scrollbar-thumb { background: var(--border); }
+.t-time  { color: var(--text3); }
+.t-info  { color: var(--accent); }
+.t-ok    { color: var(--green); }
+.t-warn  { color: var(--orange); }
+.t-err   { color: var(--red); }

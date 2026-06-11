@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTRA — Threat Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+
+<!-- CSS -->
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/pages/auth.css">
+<link rel="stylesheet" href="css/pages/gossip.css">
+<link rel="stylesheet" href="css/pages/blockchain.css">
+<link rel="stylesheet" href="css/pages/pages.css">
+
+<style>
+/* ══════════════════════════════════
+   SENTRA LANDING PAGE — OVERLAY
+   Shows once per session, resets on signout
+══════════════════════════════════ */
+#sentra-landing {
+  position: fixed; inset: 0;
+  background: #111416;
+  z-index: 99999;
+  overflow-y: auto;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+}
+
+/* scanline texture */
+#sentra-landing::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(42,48,64,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42,48,64,0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sl-scan {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, #22c55e, transparent);
+  animation: slScan 3s linear infinite;
+  opacity: 0.5; z-index: 1; pointer-events: none;
+}
+
+/* nav */
+.sl-nav {
+  position: sticky; top: 0;
+  background: rgba(24,28,32,0.85);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(42,48,64,0.5);
+  padding: 16px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 10;
+}
+.sl-nav-brand { display: flex; align-items: center; gap: 12px; }
+.sl-logo-box {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px rgba(59,130,246,0.3);
+}
+.sl-brand-name { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.05em; }
+.sl-brand-sub  { font-size: 10px; color: #64748b; font-family: 'DM Mono', monospace; letter-spacing: 0.12em; }
+.sl-enter-btn {
+  padding: 9px 20px;
+  background: #3b82f6;
+  border: none; border-radius: 8px;
+  color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 7px;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.sl-enter-btn:hover { background: #2563eb; box-shadow: 0 4px 18px rgba(59,130,246,0.3); }
+
+/* hero */
+.sl-hero {
+  position: relative; z-index: 2;
+  padding: 60px 32px 40px;
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+@media (max-width: 768px) {
+  .sl-hero { grid-template-columns: 1fr; padding: 40px 20px 24px; }
+  .sl-hero-right { display: none; }
+}
+.sl-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 99px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.2);
+  color: #22c55e; font-size: 11px;
+  font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
+  margin-bottom: 20px;
+  animation: slUp 0.5s ease both;
+}
+.sl-badge-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: slPulse 2s infinite; }
+.sl-h1 {
+  font-size: clamp(32px, 4vw, 52px); font-weight: 800;
+  line-height: 1.15; color: #e2e8f0; margin-bottom: 16px;
+  animation: slUp 0.5s 0.08s ease both;
+}
+.sl-h1-grad {
+  background: linear-gradient(135deg, #3b82f6 0%, #22c55e 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sl-desc {
+  font-size: 15px; color: #94a3b8; line-height: 1.7;
+  max-width: 480px; margin-bottom: 28px;
+  animation: slUp 0.5s 0.14s ease both;
+}
+.sl-cta-row {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 36px;
+  animation: slUp 0.5s 0.18s ease both;
+}
+.sl-cta-primary {
+  padding: 13px 28px;
+  background: linear-gradient(135deg, #3b82f6, #22c55e);
+  border: none; border-radius: 10px;
+  color: #fff; font-size: 14px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: box-shadow 0.2s, opacity 0.15s;
+}
+.sl-cta-primary:hover { box-shadow: 0 6px 24px rgba(34,197,94,0.25); opacity: 0.92; }
+.sl-cta-secondary {
+  padding: 13px 28px;
+  background: transparent;
+  border: 1px solid #2a3040;
+  border-radius: 10px; color: #e2e8f0;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.sl-cta-secondary:hover { border-color: #3b82f6; }
+
+/* hero stats */
+.sl-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0; border-top: 1px solid #2a3040; padding-top: 28px;
+  animation: slUp 0.5s 0.22s ease both;
+}
+.sl-stat-val { font-size: 26px; font-weight: 700; font-family: 'DM Mono', monospace; color: #fff; }
+.sl-stat-lbl { font-size: 11px; color: #64748b; margin-top: 3px; }
+
+/* hero right visual */
+.sl-visual {
+  position: relative; height: 420px;
+  display: flex; align-items: center; justify-content: center;
+  animation: slUp 0.5s 0.12s ease both;
+}
+.sl-shield-wrap { position: relative; z-index: 2; animation: slFloat 6s ease-in-out infinite; }
+.sl-shield-box {
+  width: 200px; height: 200px;
+  background: linear-gradient(135deg, #1a1d21, #181c20);
+  border: 1px solid #2a3040; border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 20px 60px rgba(59,130,246,0.08);
+  position: relative; overflow: hidden;
+}
+.sl-shield-box::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+}
+.sl-orbit {
+  position: absolute; inset: 0;
+  animation: slSpin 20s linear infinite;
+}
+.sl-orbit-dot {
+  position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #3b82f6; box-shadow: 0 0 10px rgba(59,130,246,0.6);
+}
+.sl-orbit2 { animation: slSpin 15s linear infinite reverse; }
+.sl-orbit2 .sl-orbit-dot { background: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,0.6); bottom: -5px; top: auto; }
+.sl-float-card {
+  position: absolute;
+  background: rgba(24,28,32,0.9); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid #2a3040; border-radius: 12px;
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.sl-float-card:nth-child(3) { top: 20px; right: 0; animation: slFloat 6s 1s ease-in-out infinite; }
+.sl-float-card:nth-child(4) { bottom: 60px; left: 0; animation: slFloat 6s 2s ease-in-out infinite; }
+.sl-float-card:nth-child(5) { top: 50%; right: -10px; transform: translateY(-50%); animation: slFloat 6s 1.5s ease-in-out infinite; }
+.sl-fc-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.sl-fc-title { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+.sl-fc-sub   { font-size: 10px; color: #64748b; font-family: 'DM Mono', monospace; }
+.sl-glow { position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(59,130,246,0.06) 0%, transparent 70%); border-radius: 50%; }
+
+/* features */
+.sl-section {
+  position: relative; z-index: 2;
+  padding: 48px 32px; max-width: 1100px; margin: 0 auto;
+}
+@media (max-width: 768px) { .sl-section { padding: 32px 20px; } }
+.sl-section-title { font-size: 28px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px; text-align: center; }
+.sl-section-sub   { font-size: 14px; color: #94a3b8; text-align: center; margin-bottom: 32px; }
+.sl-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+@media (max-width: 900px) { .sl-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .sl-grid { grid-template-columns: 1fr; } }
+.sl-feat-card {
+  background: #181c20; border: 1px solid #2a3040;
+  border-radius: 16px; padding: 22px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.sl-feat-card:hover { transform: translateY(-2px); }
+.sl-feat-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.sl-feat-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 6px; }
+.sl-feat-desc  { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+
+/* metrics */
+.sl-metrics-wrap {
+  position: relative; z-index: 2;
+  padding: 0 32px 40px; max-width: 1100px; margin: 0 auto;
+}
+@media (max-width: 768px) { .sl-metrics-wrap { padding: 0 20px 32px; } }
+.sl-metrics-card {
+  background: rgba(24,28,32,0.7); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid #2a3040; border-radius: 20px;
+  padding: 36px; position: relative; overflow: hidden;
+}
+.sl-metrics-glow {
+  position: absolute; top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%);
+  pointer-events: none;
+}
+.sl-metrics-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+}
+@media (max-width: 700px) { .sl-metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+.sl-metric {
+  background: #111416; border: 1px solid #2a3040;
+  border-radius: 14px; padding: 20px; text-align: center;
+}
+.sl-metric-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+}
+.sl-metric-val { font-size: 28px; font-weight: 700; font-family: 'DM Mono', monospace; color: #fff; }
+.sl-metric-lbl { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.sl-metric-sub { font-size: 11px; margin-top: 6px; font-family: 'DM Mono', monospace; }
+
+/* footer CTA */
+.sl-footer-cta {
+  position: relative; z-index: 2;
+  padding: 20px 32px 40px; max-width: 1100px; margin: 0 auto;
+  text-align: center;
+}
+.sl-footer-cta h2 { font-size: 32px; font-weight: 800; color: #e2e8f0; margin-bottom: 12px; }
+.sl-footer-cta p  { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+.sl-footer-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* footer bar */
+.sl-footer-bar {
+  position: relative; z-index: 2;
+  border-top: 1px solid rgba(42,48,64,0.5);
+  padding: 20px 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  font-size: 12px; color: #64748b;
+}
+
+/* fade out transition */
+#sentra-landing.sl-hide {
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+#checkHist {
+  display: table-row-group !important;
+}
+
+#checkHist tr {
+  display: table-row !important;
+}
+
+#checkHist td {
+  display: table-cell !important;
+  padding: 10px;
+  color: white;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+/* keyframes */
+@keyframes slUp    { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+@keyframes slSpin  { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+@keyframes slPulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+@keyframes slScan  { 0% { transform:translateY(-2px); } 100% { transform:translateY(100vh); } }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     SENTRA LANDING PAGE
+     Controlled by sessionStorage key 'sentra_seen'
+     Set to 'yes' on OK click / login
+     Cleared on logout so it shows again next visit
+══════════════════════════════════ -->
+<div id="sentra-landing">
+  <div class="sl-scan"></div>
+
+  <!-- Nav -->
+  <nav class="sl-nav">
+    <div class="sl-nav-brand">
+      <div class="sl-logo-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="sl-brand-name">SENTRA</div>
+        <div class="sl-brand-sub">THREAT INTELLIGENCE</div>
+      </div>
+    </div>
+    <button class="sl-enter-btn" onclick="enterDashboard()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Access Console
+    </button>
+  </nav>
+
+  <!-- Hero -->
+  <div class="sl-hero">
+    <!-- Left -->
+    <div>
+      <div class="sl-badge">
+        <span class="sl-badge-dot"></span>
+        SYSTEM OPERATIONAL — 7 NODES ACTIVE
+      </div>
+      <h1 class="sl-h1">Decentralized<br><span class="sl-h1-grad">Threat Intelligence</span><br>Network</h1>
+      <p class="sl-desc">SENTRA is a blockchain-secured, distributed cybersecurity platform that aggregates real-time threat data across a peer-to-peer network of autonomous nodes.</p>
+      <div class="sl-cta-row">
+        <button class="sl-cta-primary" onclick="enterDashboard()">
+          <span>Launch Dashboard</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button class="sl-cta-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Documentation
+        </button>
+      </div>
+      <div class="sl-stats">
+        <div>
+          <div class="sl-stat-val" style="color:#ef4444">1,847</div>
+          <div class="sl-stat-lbl">Threats Blocked</div>
+        </div>
+        <div>
+          <div class="sl-stat-val" style="color:#22c55e">7/9</div>
+          <div class="sl-stat-lbl">Nodes Online</div>
+        </div>
+        <div>
+          <div class="sl-stat-val" style="color:#3b82f6">214</div>
+          <div class="sl-stat-lbl">Chain Blocks</div>
+        </div>
+      </div>
+    </div>
+    <!-- Right visual -->
+    <div class="sl-hero-right">
+      <div class="sl-visual">
+        <div class="sl-shield-wrap">
+          <div class="sl-shield-box">
+            <div class="sl-orbit"><div class="sl-orbit-dot"></div></div>
+            <div class="sl-orbit sl-orbit2"><div class="sl-orbit-dot"></div></div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 12px rgba(34,197,94,0.35))"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+        </div>
+        <!-- Floating cards -->
+        <div class="sl-float-card">
+          <div class="sl-fc-icon" style="background:rgba(239,68,68,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div><div class="sl-fc-title">Malware Detected</div><div class="sl-fc-sub">Signature #2847</div></div>
+        </div>
+        <div class="sl-float-card">
+          <div class="sl-fc-icon" style="background:rgba(59,130,246,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+          <div><div class="sl-fc-title">Block Mined</div><div class="sl-fc-sub">#214 Verified</div></div>
+        </div>
+        <div class="sl-float-card">
+          <div class="sl-fc-icon" style="background:rgba(234,179,8,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div><div class="sl-fc-title">Node Update</div><div class="sl-fc-sub">Gossip Round 47</div></div>
+        </div>
+        <div class="sl-glow"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="sl-section">
+    <div class="sl-section-title">Platform <span class="sl-h1-grad">Capabilities</span></div>
+    <div class="sl-section-sub">Enterprise-grade security infrastructure powered by distributed consensus and real-time analytics.</div>
+    <div class="sl-grid">
+      <div class="sl-feat-card" style="border-color:#2a3040" onmouseover="this.style.borderColor='#3b82f650'" onmouseout="this.style.borderColor='#2a3040'">
+        <div class="sl-feat-icon" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div class="sl-feat-title">Threat Check</div>
+        <div class="sl-feat-desc">Analyze IPs, domains & file hashes against live threat feeds with real-time scoring.</div>
+      </div>
+      <div class="sl-feat-card" onmouseover="this.style.borderColor='#22c55e50'" onmouseout="this.style.borderColor='#2a3040'">
+        <div class="sl-feat-icon" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+        <div class="sl-feat-title">Blockchain Ledger</div>
+        <div class="sl-feat-desc">Immutable proof-of-work threat log with cryptographic verification and chain integrity.</div>
+      </div>
+      <div class="sl-feat-card" onmouseover="this.style.borderColor='#3b82f650'" onmouseout="this.style.borderColor='#2a3040'">
+        <div class="sl-feat-icon" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="sl-feat-title">Gossip Network</div>
+        <div class="sl-feat-desc">P2P threat sharing across autonomous nodes with Byzantine fault tolerance.</div>
+      </div>
+      <div class="sl-feat-card" onmouseover="this.style.borderColor='#f9731650'" onmouseout="this.style.borderColor='#2a3040'">
+        <div class="sl-feat-icon" style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
+        <div class="sl-feat-title">Node Manager</div>
+        <div class="sl-feat-desc">Monitor node health, packet traffic, and cluster status across the network.</div>
+      </div>
+      <div class="sl-feat-card" onmouseover="this.style.borderColor='#eab30850'" onmouseout="this.style.borderColor='#2a3040'">
+        <div class="sl-feat-icon" style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="sl-feat-title">Packet Monitor</div>
+        <div class="sl-feat-desc">Deep packet inspection with anomaly detection and port scanning identification.</div>
+      </div>
+      <div class="sl-feat-card" onmouseover="this.style.borderColor='#3b82f650'" onmouseout="this.style.borderColor='#2a3040'">
+        <div class="sl-feat-icon" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="sl-feat-title">Crypto Tools</div>
+        <div class="sl-feat-desc">Hash verification, signature validation and secure communication utilities.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Metrics -->
+  <div class="sl-metrics-wrap">
+    <div class="sl-metrics-card">
+      <div class="sl-metrics-glow"></div>
+      <div style="text-align:center;margin-bottom:28px;position:relative;z-index:1">
+        <div class="sl-section-title" style="margin-bottom:6px">Security <span class="sl-h1-grad">Metrics</span></div>
+        <div class="sl-section-sub" style="margin-bottom:0">Real-time protection statistics across the distributed network</div>
+      </div>
+      <div class="sl-metrics-grid" style="position:relative;z-index:1">
+        <div class="sl-metric">
+          <div class="sl-metric-icon" style="background:rgba(239,68,68,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="sl-metric-val">342</div>
+          <div class="sl-metric-lbl">Malware Active</div>
+          <div class="sl-metric-sub" style="color:#ef4444">+8 this hour</div>
+        </div>
+        <div class="sl-metric">
+          <div class="sl-metric-icon" style="background:rgba(249,115,22,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div class="sl-metric-val">189</div>
+          <div class="sl-metric-lbl">Phishing URLs</div>
+          <div class="sl-metric-sub" style="color:#22c55e">-2 resolved</div>
+        </div>
+        <div class="sl-metric">
+          <div class="sl-metric-icon" style="background:rgba(59,130,246,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+          <div class="sl-metric-val">47</div>
+          <div class="sl-metric-lbl">Flagged IPs</div>
+          <div class="sl-metric-sub" style="color:#3b82f6">Top: 185.220.x</div>
+        </div>
+        <div class="sl-metric">
+          <div class="sl-metric-icon" style="background:rgba(34,197,94,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="sl-metric-val">99.9%</div>
+          <div class="sl-metric-lbl">Uptime</div>
+          <div class="sl-metric-sub" style="color:#22c55e">Chain intact</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer CTA -->
+  <div class="sl-footer-cta">
+    <h2>Secure Your <span class="sl-h1-grad">Infrastructure</span></h2>
+    <p>Join the distributed network. Start monitoring, detecting, and neutralizing cyber threats in real-time.</p>
+    <div class="sl-footer-row">
+      <button class="sl-cta-primary" onclick="enterDashboard()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        OK — Enter Console
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer bar -->
+  <div class="sl-footer-bar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="sl-logo-box" style="width:28px;height:28px"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <span style="color:#e2e8f0;font-weight:700;font-size:13px">SENTRA</span>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px">v2.4.1-stable • Build 2026.04.17</div>
+  </div>
+</div>
+<!-- ── END LANDING PAGE ── -->
+
+<!-- ── THEME TOGGLE (AUTH PAGES) ── -->
+<button class="theme-toggle-auth" onclick="toggleTheme()" id="authThemeBtn">☀️</button>
+<!-- LOGIN -->
+<div id="auth-login">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">S</div>
+        <div class="auth-logo-name">SENTRA</div>
+      </div>
+      <div class="auth-title">Sign in</div>
+      <div class="auth-sub">Access your threat intelligence dashboard</div>
+
+      <div id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email address</label>
+          <input type="email" class="form-input" id="login-email" placeholder="analyst@org.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-pass">Password</label>
+          <input type="password" class="form-input" id="login-pass" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter') handleLogin()">
+        </div>
+        <div class="remember-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="login-remember"> Remember this device
+          </label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+        <button class="btn-primary" id="login-btn" data-label="Sign in" onclick="handleLogin()">Sign in</button>
+      </div>
+
+      <div class="auth-switch">
+        Don't have an account? <a href="#" onclick="showSignup()">Create one</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- SIGNUP -->
+<div id="auth-signup" style="display:none">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">S</div>
+        <div class="auth-logo-name">SENTRA</div>
+      </div>
+      <div class="auth-title">Create account</div>
+      <div class="auth-sub">Join the distributed threat intelligence network</div>
+
+      <div id="signup-form">
+        <div class="input-row" style="margin-bottom:16px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="signup-firstname">First name</label>
+            <input type="text" class="form-input" id="signup-firstname" placeholder="Alex">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="signup-lastname">Last name</label>
+            <input type="text" class="form-input" id="signup-lastname" placeholder="Morgan">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email address</label>
+          <input type="email" class="form-input" id="signup-email" placeholder="analyst@org.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-role">Node Role</label>
+          <select class="form-select" id="signup-role">
+            <option value="Analyst">Analyst — view &amp; analyze threats</option>
+            <option value="Admin">Admin — manage nodes &amp; settings</option>
+            <option value="Observer">Observer — read-only access</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-pass">Password</label>
+          <input type="password" class="form-input" id="signup-pass" placeholder="Min. 8 characters">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-confirm">Confirm password</label>
+          <input type="password" class="form-input" id="signup-confirm" placeholder="Repeat password"
+            onkeydown="if(event.key==='Enter') handleSignup()">
+        </div>
+        <button class="btn-primary" id="signup-btn" data-label="Create account" onclick="handleSignup()">Create account</button>
+      </div>
+
+      <div class="auth-switch">
+        Already have an account? <a href="#" onclick="showLogin()">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════════════ APP ══════════════ -->
+<div id="app">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-top">
+        <div class="s-logo">
+          <div class="s-logo-mark">S</div>
+          <div class="s-logo-name">SENTRA</div>
+        </div>
+        <div class="s-tagline">Threat Intelligence</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Overview</div>
+        <div class="nav-item active" onclick="gotoPage('dashboard',this)">
+          <span class="nav-icon">⬡</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="gotoPage('feed',this)">
+          <span class="nav-icon">⚡</span> Threat Feed
+          <span class="nav-badge">12</span>
+        </div>
+        <div class="nav-section-label">Analysis</div>
+        <div class="nav-item" onclick="gotoPage('check',this)">
+          <span class="nav-icon">◎</span> Threat Check
+        </div>
+        <div class="nav-item" onclick="gotoPage('gossip',this)">
+          <span class="nav-icon">◈</span> Gossip Network
+        </div>
+        <div class="nav-section-label">Infrastructure</div>
+        <div class="nav-item" onclick="gotoPage('nodes',this)">
+          <span class="nav-icon">▣</span> Node Manager
+        </div>
+        <div class="nav-item" onclick="gotoPage('chain',this)">
+          <span class="nav-icon">⛓</span> Blockchain Ledger
+        </div>
+        <div class="nav-item" onclick="gotoPage('packets',this)">
+          <span class="nav-icon">📡</span> Packet Monitor
+        </div>
+        <div class="nav-section-label">Security</div>
+        <div class="nav-item" onclick="gotoPage('crypto',this)">
+          <span class="nav-icon">🔐</span> Crypto Tools
+        </div>
+        <div class="nav-section-label">Info</div>
+        <div class="nav-item" onclick="gotoPage('about',this)">
+          <span class="nav-icon">👥</span> About Team
+</div>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="user-row">
+          <div class="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name">Alex Morgan</div>
+            <div class="user-role">Analyst</div>
+          </div>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel">Light mode</span>
+        </button>
+        <button class="logout-btn" onclick="logout()">← Sign out</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-area">
+      <div class="topbar">
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="topbar-right">
+          <div class="status-chip"><div class="live-dot"></div> 7 Nodes Online</div>
+          <div class="clock-badge" id="clock">--:--:--</div>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <!-- ══ ABOUT ══ -->
+<div class="page" id="page-about">
+  <style>
+    .about-wrapper { padding: 40px; width: 100%; box-sizing: border-box; animation: fadeIn 0.5s ease-in-out; }
+    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 100%; max-width: 1400px; margin: 40px auto; }
+    .member-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 24px; padding: 40px; text-align: center; min-height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s; }
+    .member-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .photo-frame { width: 160px; height: 160px; border-radius: 50%; padding: 5px; border: 3px solid var(--accent); margin-bottom: 20px; }
+    .photo-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .member-name { font-size: 1.4rem; font-weight: 700; color: #fff; margin: 5px 0; }
+    .member-role { color: var(--accent); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 15px; }
+    .member-desc { color: var(--text2); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+
+  <div class="about-wrapper">
+    <div class="sec-header" style="justify-content:center; flex-direction:column; align-items:center; text-align:center; margin-bottom: 0;">
+      <div class="sec-title" style="font-size:2rem; letter-spacing:2px;">MEET OUR TEAM</div>
+      <div class="sec-sub">The Experts Behind SENTRA Threat Intelligence</div>
+    </div>
+
+    <div class="team-grid">
+      <div class="member-card">
+        <div class="photo-frame"><img src="images/ganeshimg.jpeg" alt="Ganesh Palav"></div>
+        <h2 class="member-name">Ganesh Palav</h2>
+        <span class="member-role">Lead Developer</span>
+        <p class="member-desc">Architect of the SENTRA engine, specializing in threat detection and core system logic.</p>
+      </div>
+      <div class="member-card">
+        <div class="photo-frame"><img src="images/FinalAditya.jpeg" alt="Aditya Bankar"></div>
+        <h2 class="member-name">Aditya Bankar</h2>
+        <span class="member-role">Security Analyst</span>
+        <p class="member-desc">Focused on vulnerability research and network simulation to stress-test the gossip propagation system.</p>
+      </div>
+      <div class="member-card">
+        <div class="photo-frame"><img src="images/adityaGupta.jpeg" alt="Aditya Gupta"></div>
+        <h2 class="member-name">Aditya Gupta</h2>
+        <span class="member-role">Blockchain Architect</span>
+        <p class="member-desc">Leading the decentralized ledger integration to ensure tamper-proof security logs across the network.</p>
+      </div>
+      <div class="member-card">
+        <div class="photo-frame"><img src="images/pratikimg.jpeg" alt="Pratik Jingare"></div>
+        <h2 class="member-name">Pratik Jingare</h2>
+        <span class="member-role">UI/UX Researcher</span>
+        <p class="member-desc">Expert in data visualization, transforming complex gossip protocol metrics into intuitive user dashboards.</p>
+      </div>
+    </div>
+  </div>
+</div>
+        <!-- ══ DASHBOARD ══ -->
+        <div class="page active" id="page-dashboard">
+          <div class="alert alert-red">⚠️ 3 new malware signatures detected in the last 10 minutes — nodes 3, 5, 7 flagged</div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:var(--accent-bg)">🛡️</div>
+              <div class="stat-label">Total Threats</div>
+              <div class="stat-value">1,847</div>
+              <div class="stat-delta delta-up">↑ +23 today</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:var(--red-bg)">🦠</div>
+              <div class="stat-label">Malware</div>
+              <div class="stat-value">342</div>
+              <div class="stat-delta delta-down">↑ +8 active</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:var(--orange-bg)">🎣</div>
+              <div class="stat-label">Phishing</div>
+              <div class="stat-value">189</div>
+              <div class="stat-delta delta-up">↓ −2 resolved</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:var(--green-bg)">🖥️</div>
+              <div class="stat-label">Nodes Online</div>
+              <div class="stat-value">7/9</div>
+              <div class="stat-delta delta-neutral">2 offline</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:var(--purple-bg)">⛓️</div>
+              <div class="stat-label">Blocks</div>
+              <div class="stat-value">214</div>
+              <div class="stat-delta delta-up">chain intact</div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Threat Distribution</div></div>
+              <div class="card-body"><canvas id="distChart" height="180"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Detection Activity (24h)</div></div>
+              <div class="card-body"><canvas id="timeChart" height="180"></canvas></div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Top Flagged IPs</div></div>
+              <div class="card-body-0"><table class="data-table" id="topIpTbl2"></table></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">System Log</div></div>
+              <div class="card-body" style="padding:10px">
+                <div class="terminal" id="syslog"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ THREAT FEED ══ -->
+        <div class="page" id="page-feed">
+          <div class="sec-header">
+            <div>
+              <div class="sec-title">Live Threat Feed</div>
+              <div class="sec-sub">Real-time indicators propagated across nodes</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select class="field-input" style="width:auto" id="feedFilter" onchange="renderFeed()">
+                <option value="all">All types</option>
+                <option value="malware">Malware</option>
+                <option value="phishing">Phishing</option>
+                <option value="suspicious">Suspicious</option>
+                <option value="safe">Safe</option>
+              </select>
+              <button class="btn btn-accent btn-sm" onclick="injectThreat()">+ Inject</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body-0">
+              <table class="data-table">
+                <thead><tr>
+                  <th>Time</th><th>Indicator</th><th>Type</th>
+                  <th>Category</th><th>Score</th><th>Node</th><th>Verified</th>
+                </tr></thead>
+                <tbody id="feedTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ THREAT CHECK ══ -->
+        <div class="page" id="page-check">
+          <div class="g-3-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Threat Analyzer</div></div>
+              <div class="card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                  <div class="field">
+                    <label class="field-label" for="iType">Indicator type</label>
+                    <select class="field-input" id="iType" title="Indicator type">
+                      <option>IP Address</option>
+                      <option>URL</option>
+                      <option>File Hash (MD5)</option>
+                      <option>File Hash (SHA-256)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="sourceNode">Source node</label>
+                    <select class="field-input" id="sourceNode">
+                      <option value="NODE-01">NODE-01 (192.168.1.10)</option>
+                      <option value="NODE-02">NODE-02 (192.168.1.11)</option>
+                      <option value="NODE-03">NODE-03 (192.168.1.12)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:12px">
+                  <label class="field-label" for="iVal">Indicator value</label>
+                  <input type="text" class="form-input" id="iVal" placeholder="e.g. 185.220.101.45 or https://evil.example.com">
+                </div>
+                <div class="field" style="margin-bottom:14px">
+                  <label class="field-label" for="iCtx">Context (optional)</label>
+                  <input type="text" class="form-input" id="iCtx" placeholder="Found in email, suspicious traffic...">
+                </div>
+                <button class="btn btn-accent" onclick="runCheck()">Analyze indicator</button>
+                <div class="result-card" id="checkResult">
+                  <div class="result-top">
+                    <div>
+                      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Analysis Result</div>
+                      <div id="res-val" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text)"></div>
+                      <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+                        <span id="res-badge"></span>
+                        <span id="res-reason" style="font-size:12px;color:var(--text2)"></span>
+                      </div>
+                    </div>
+                    <div class="result-score" id="res-circle">
+                      <div class="result-score-num" id="res-score">0</div>
+                      <div class="result-score-lbl">SCORE</div>
+                    </div>
+                  </div>
+                  <div class="result-meta" id="res-meta"></div>
+                </div>
+                <div class="divider"></div>
+                <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:500">Quick samples</div>
+                <div class="samples-row">
+                  <span class="tag" onclick="fillSample('185.220.101.45','IP Address')">185.220.101.45</span>
+                  <span class="tag" onclick="fillSample('8.8.8.8','IP Address')">8.8.8.8</span>
+                  <span class="tag" onclick="fillSample('https://paypa1-secure.tk','URL')">paypa1-secure.tk</span>
+                  <span class="tag" onclick="fillSample('d41d8cd98f00b204e9800998ecf8427e','File Hash (MD5)')">d41d8cd...</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Recent Checks</div></div>
+              <div class="card-body">
+                <table class="data-table">
+                  <thead><tr><th>Indicator</th><th>Result</th><th>Score</th></tr></thead>
+                  <tbody id="checkHist">
+                  <tr>
+                    <td colspan="3" style="text-align:center;color:gray">
+                      No checks yet
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ GOSSIP ══ -->
+        <div class="page" id="page-gossip">
+          <div class="sec-header">
+            <div>
+              <div class="sec-title">P2P Gossip Simulation</div>
+              <div class="sec-sub">Visualize how threat data propagates between nodes</div>
+            </div>
+            <div style="font-size:12px;color:var(--text2)" id="gossipStat">Idle</div>
+          </div>
+          <div class="card mb16">
+            <div class="card-header">
+              <div class="card-title">Network Topology</div>
+              <div style="font-size:11px;color:var(--text3)" id="gossipInfo">7 nodes</div>
+            </div>
+            <div class="card-body">
+              <canvas id="gossipCanvas"></canvas>
+              <div class="gossip-controls">
+                <button class="btn btn-accent btn-sm" onclick="startGossip()">▶ Propagate</button>
+                <button class="btn btn-outline btn-sm" onclick="replayGossip()">↺ Replay</button>
+                <button class="btn btn-outline btn-sm" onclick="addGossipNode()">+ Add node</button>
+                <button class="btn btn-danger btn-sm" onclick="resetGossip()">✕ Reset</button>
+                <button class="btn btn-outline btn-sm" onclick="pauseGossip()" id="pauseBtn">⏸ Pause</button>
+                <button class="btn btn-outline btn-sm btn-firewall" onclick="toggleFirewallMode()">
+  🔒 Firewall Edge
+</button>
+                <!-- Start node selector -->
+                <div style="display:flex;align-items:center;gap:6px;margin-left:4px">
+                  <label style="font-size:11px;color:var(--text2);font-weight:500">Start from</label>
+                  <select class="field-input" id="startNodeSel" style="width:auto;padding:4px 8px;font-size:12px"></select>
+                </div>
+                <!-- Speed slider -->
+                <div style="display:flex;align-items:center;gap:6px;margin-left:4px">
+                  <label for="speedSlider" style="font-size:11px;color:var(--text2);font-weight:500">Speed</label>
+                  <input type="range" id="speedSlider" min="0.25" max="4" step="0.25" value="1" title="Propagation speed"
+                    oninput="onSpeedChange(this.value)" aria-label="Animation speed">
+                  <span id="speedLabel" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);min-width:28px">1x</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Propagation Log</div></div>
+              <div class="card-body" style="padding:10px">
+                <div class="terminal" id="gossipLog"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Node Status</div></div>
+              <div class="card-body-0">
+                <table class="data-table">
+                  <thead><tr><th>Node</th><th>Peers</th><th>Msgs</th><th>State</th></tr></thead>
+                  <tbody id="gNodeTbl"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+       <!-- ══ NODES ══ -->
+<div class="page" id="page-nodes">
+  <div class="sec-header">
+    <div>
+      <div class="sec-title">Node Manager</div>
+      <div class="sec-sub">Registered peers in the distributed network</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-accent btn-sm" onclick="addNodeCard()">+ Register node</button>
+      
+      <!-- Clear All Button -->
+      <button class="btn btn-sm" onclick="clearAllNodes()"
+        style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.15s;"
+        onmouseover="this.style.background='rgba(239,68,68,0.25)';this.style.borderColor='rgba(239,68,68,0.5)'" 
+        onmouseout="this.style.background='rgba(239,68,68,0.15)';this.style.borderColor='rgba(239,68,68,0.3)'">
+        🗑 Clear all
+      </button>
+      
+      <div style="position:relative;display:inline-block;">
+        <button class="btn btn-sm" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'"
+          style="background:rgba(255,255,255,0.05);border:1px solid #2a3040;color:#9ca3af;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;">
+          ⬇ Export
+        </button>
+        <div style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#1a2030;border:1px solid #2a3040;border-radius:8px;overflow:hidden;flex-direction:column;z-index:50;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+          <button onclick="downloadNodes('json');this.closest('div[style*=absolute]').style.display='none'"
+            style="background:none;border:none;color:#e2e8f0;padding:10px 16px;cursor:pointer;font-size:12px;text-align:left;display:flex;align-items:center;gap:8px;transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='none'">
+            📄 Export JSON
+          </button>
+          <button onclick="downloadNodes('csv');this.closest('div[style*=absolute]').style.display='none'"
+            style="background:none;border:none;color:#e2e8f0;padding:10px 16px;cursor:pointer;font-size:12px;text-align:left;display:flex;align-items:center;gap:8px;transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='none'">
+            📊 Export CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="node-grid" id="nodeGrid"></div>
+</div>
+        
+     <!-- ══ BLOCKCHAIN ══ -->
+<div class="page" id="page-chain">
+  
+  <!-- Header -->
+  <div class="sec-header">
+    <div>
+      <div class="sec-title">Blockchain Ledger</div>
+      <div class="sec-sub">Tamper-proof record of verified threat indicators</div>
+    </div>
+  </div>
+
+  <!-- Status Alert -->
+  <div class="alert alert-green" id="chainAlert">
+    <span id="chainAlertIcon">✓</span>
+    <span id="chainAlertText">Chain integrity verified — all blocks valid</span>
+  </div>
+
+  <!-- Mining Section -->
+  <div class="card mb16">
+    <div class="card-header">
+      <div class="card-title">⛏ Mine New Block</div>
+    </div>
+    <div class="card-body" style="display:flex; gap:12px; align-items:center;">
+      <input 
+        id="mineInput" 
+        type="text" 
+        class="form-input" 
+        placeholder="Enter IOC to mine (e.g., 185.220.101.45 [MALWARE], fake-av.ru, d41d8cd...)"
+        style="flex:1; min-width:0;"
+        onkeydown="if(event.key==='Enter') mineBlock()"
+      />
+      <button class="btn btn-accent" onclick="mineBlock()">
+        <span style="margin-right:6px;">⛏</span> Mine Block
+      </button>
+    </div>
+  </div>
+
+  <!-- Chain Visualization -->
+  <div class="card mb16">
+    <div class="card-header">
+      <div class="card-title">🔗 Chain Visualization</div>
+      <div style="font-size:11px; color:var(--text3);" id="blockCount">0 blocks</div>
+    </div>
+    <div class="card-body" style="padding:0; background:var(--bg2);">
+      <div class="chain-row" id="chainViz">
+        <!-- Blocks render here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Block Details Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📋 Block Details</div>
+    </div>
+    <div class="card-body-0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:50px;">#</th>
+            <th style="width:180px;">Hash</th>
+            <th style="width:180px;">Prev Hash</th>
+            <th>Data</th>
+            <th style="width:80px;">Nonce</th>
+            <th style="width:140px;">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody id="chainTbody">
+          <!-- Rows render here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+        <!-- ══ PACKETS ══ -->
+        <div class="page" id="page-packets">
+          <div class="sec-header">
+            <div>
+              <div class="sec-title">Packet Monitor</div>
+              <div class="sec-sub">Live network traffic with threat detection</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-success btn-sm" onclick="startCapture()" id="captureBtn">▶ Start capture</button>
+              <button class="btn btn-danger btn-sm" onclick="stopCapture()" id="stopBtn" disabled>⏹ Stop</button>
+              <button class="btn btn-outline btn-sm" onclick="clearPkts()">Clear</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">
+            <div class="stat-card"><div class="stat-label">Total Packets</div><div class="stat-value" id="pt">0</div></div>
+            <div class="stat-card"><div class="stat-label">Unsafe</div><div class="stat-value" style="color:var(--red)" id="pu">0</div></div>
+            <div class="stat-card"><div class="stat-label">Suspicious</div><div class="stat-value" style="color:var(--orange)" id="pw">0</div></div>
+            <div class="stat-card"><div class="stat-label">Safe</div><div class="stat-value" style="color:var(--green)" id="ps">0</div></div>
+          </div>
+          <div class="card">
+            <div class="pkt-head">
+              <span>Time</span><span>Source IP</span><span>Dest IP</span><span>Protocol</span><span>Info</span>
+            </div>
+            <div class="pkt-feed" id="pktFeed"></div>
+          </div>
+        </div>
+
+        <!-- ══ CRYPTO ══ -->
+        <div class="page" id="page-crypto">
+          <div class="g2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">SHA-256 Hash Generator</div></div>
+              <div class="card-body">
+                <div class="field" style="margin-bottom:10px">
+                  <label class="field-label" for="hashIn">Input data</label>
+                  <textarea class="field-input" id="hashIn" rows="3" placeholder="Enter text or paste IOC data..."></textarea>
+                </div>
+                <button class="btn btn-accent btn-sm" onclick="genHash()">Generate hash</button>
+                <div id="hashOut"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">RSA Digital Signature (Simulated)</div></div>
+              <div class="card-body">
+                <div class="field" style="margin-bottom:10px">
+                  <label class="field-label" for="sigIn">Message to sign</label>
+                  <textarea class="field-input" id="sigIn" rows="3" placeholder="Enter message..."></textarea>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-accent btn-sm" onclick="signMsg()">Sign</button>
+                  <button class="btn btn-outline btn-sm" onclick="verifyMsg()">Verify</button>
+                </div>
+                <div id="sigOut"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">AES Encryption (Simulated)</div></div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+                <div class="field">
+                  <label class="field-label" for="aesIn">Plaintext</label>
+                  <input type="text" class="field-input" id="aesIn" placeholder="Data to encrypt...">
+                </div>
+                <div class="field">
+                  <label class="field-label" for="aesKey">Key (hex, leave blank for random)</label>
+                  <input type="text" class="field-input" id="aesKey" placeholder="Auto-generated">
+                </div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-accent btn-sm" onclick="aesEnc()">Encrypt</button>
+                <button class="btn btn-outline btn-sm" onclick="aesDec()">Decrypt</button>
+              </div>
+              <div id="aesOut"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- page-content -->
+    </div><!-- main-area -->
+  </div><!-- .app -->
+</div><!-- #app -->
+
+
+<!-- ── SCRIPTS  ── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- 1. Core first -->
+<script src="js/theme.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/router.js"></script>
+<script src="js/clock.js"></script>
+<script src="js/app.js"></script>  
+
+<!-- 2. Modules after -->
+<script src="js/modules/threatfeed.js"></script>
+<script src="js/modules/threatcheck.js"></script>
+<script src="js/modules/gossip.js"></script>
+<script src="js/modules/nodes.js"></script>
+<script src="js/modules/blockchain.js"></script>
+<script src="js/modules/packets.js"></script>
+<script src="js/modules/crypto.js"></script>
+<script src="js/modules/dashboard.js"></script>
+
+<script>
+/* ══════════════════════════════════
+   LANDING PAGE LOGIC
+   - sessionStorage key: 'sentra_seen'
+   - Set to '1' when user clicks OK or logs in
+   - Removed on logout so it shows again next time
+══════════════════════════════════ */
+
+(function() {
+  const landing = document.getElementById('sentra-landing');
+  if (!landing) return;
+
+  // If already seen this session → hide immediately (no flash)
+  if (sessionStorage.getItem('sentra_seen') === '1') {
+    landing.style.display = 'none';
+    return;
+  }
+
+  // Otherwise show it (it's already visible by default)
+  // Scroll-triggered feature card animations
+  const cards = landing.querySelectorAll('.sl-feat-card, .sl-metric');
+  cards.forEach(c => {
+    c.style.opacity = '0';
+    c.style.transform = 'translateY(18px)';
+    c.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }, i * 60);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  cards.forEach(c => io.observe(c));
+})();
+
+// Called by all "enter" buttons on landing page
+function enterDashboard() {
+  sessionStorage.setItem('sentra_seen', '1');
+  const landing = document.getElementById('sentra-landing');
+  if (!landing) return;
+  landing.classList.add('sl-hide');
+  setTimeout(() => { landing.style.display = 'none'; }, 420);
+}
+
+/* ──────────────────────────────────
+   HOOK INTO auth.js logout function
+   We wrap the existing logout() so when
+   it fires we also clear 'sentra_seen',
+   meaning the landing page will show
+   again next time the user hits the page.
+────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait a tick for auth.js to define logout()
+  setTimeout(function patchLogout() {
+    if (typeof window.logout === 'function') {
+      const _origLogout = window.logout;
+      window.logout = function() {
+        // Clear the flag → landing will show on next page load
+        sessionStorage.removeItem('sentra_seen');
+        _origLogout.apply(this, arguments);
+      };
+    } else {
+      // auth.js not ready yet, try again
+      setTimeout(patchLogout, 100);
+    }
+  }, 0);
+
+  // Also hook handleLogin success → mark as seen so
+  // landing never flashes again mid-session
+  setTimeout(function patchLogin() {
+    if (typeof window.handleLogin === 'function') {
+      const _orig = window.handleLogin;
+      window.handleLogin = function() {
+        sessionStorage.setItem('sentra_seen', '1');
+        return _orig.apply(this, arguments);
+      };
+    }
+  }, 0);
+});
+</script>
+</body>
+</html>

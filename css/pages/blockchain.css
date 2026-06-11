@@ -1,0 +1,196 @@
+/* ── BLOCKCHAIN ── */
+
+/* Chain Visualization Container */
+.chain-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 16px 12px;
+  min-height: 140px;
+}
+
+.chain-row::-webkit-scrollbar {
+  height: 4px;
+}
+
+.chain-row::-webkit-scrollbar-track {
+  background: var(--bg2);
+  border-radius: 2px;
+}
+
+.chain-row::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* Individual Block Card */
+.block-item {
+  min-width: 180px;
+  max-width: 200px;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, var(--bg3), var(--bg2));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.block-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: var(--accent);
+}
+
+/* Block Number Badge */
+.block-num {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* Hash Display */
+.block-hash {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text2);
+  background: var(--bg1);
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  word-break: break-all;
+  border: 1px solid var(--border);
+}
+
+/* Data/IOC Content */
+.block-data {
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.5;
+  padding: 8px;
+  background: var(--bg1);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  margin-bottom: 10px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+/* Nonce Badge */
+.block-nonce {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.block-nonce::before {
+  content: "⛏";
+  color: var(--orange);
+}
+
+/* Arrow Between Blocks */
+.chain-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  color: var(--accent);
+  font-size: 20px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* Genesis Block Special Styling */
+.block-item:first-child {
+  border-color: var(--green);
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.1), var(--bg3));
+}
+
+.block-item:first-child .block-num {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+/* Mining Animation */
+@keyframes pulseBlock {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.block-item.mining {
+  animation: pulseBlock 1s ease-in-out infinite;
+  border-color: var(--orange);
+}
+
+/* Empty State */
+.chain-row:empty::before {
+  content: "No blocks in chain. Mine the first block above.";
+  color: var(--text3);
+  font-size: 14px;
+  padding: 40px;
+  text-align: center;
+  width: 100%;
+}
+
+/* Table Styling for Block Details */
+#chainTbody tr {
+  transition: background 0.2s;
+}
+
+#chainTbody tr:hover {
+  background: var(--bg3);
+}
+
+#chainTbody td {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 12px 8px;
+}
+
+#chainTbody td:nth-child(2),
+#chainTbody td:nth-child(3) {
+  font-size: 9px;
+  color: var(--text3);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#chainTbody td:nth-child(4) {
+  color: var(--text);
+  font-weight: 500;
+}
+
+#chainTbody td:nth-child(5) {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Alert Styling */
+#chainAlert {
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+#chainAlert.alert-green {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), transparent);
+  border-left: 3px solid var(--green);
+}
+
+#chainAlert.alert-red {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), transparent);
+  border-left: 3px solid var(--red);
+}

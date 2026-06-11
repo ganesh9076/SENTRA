@@ -1,0 +1,49 @@
+/* ── PACKET MONITOR ── */
+.pkt-head, .pkt-row {
+  display: grid; grid-template-columns: 72px 120px 120px 64px 1fr;
+  gap: 8px; padding: 7px 14px; font-size: 12px;
+}
+.pkt-head {
+  background: var(--bg3); font-size: 10px; font-weight: 600;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--border);
+}
+.pkt-row {
+  border-bottom: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px;
+}
+.pkt-row:last-child { border-bottom: none; }
+.pkt-row:hover { background: var(--bg3); }
+.pkt-row.unsafe { background: var(--red-bg); border-left: 2px solid var(--red); }
+.pkt-row.warn   { background: var(--orange-bg); border-left: 2px solid var(--orange); }
+.pkt-feed { max-height: 280px; overflow-y: auto; }
+.pkt-feed::-webkit-scrollbar { width: 3px; }
+.pkt-feed::-webkit-scrollbar-thumb { background: var(--border); }
+.proto { font-weight: 600; font-size: 10px; }
+.proto-tcp   { color: var(--accent); }
+.proto-udp   { color: var(--green); }
+.proto-dns   { color: var(--orange); }
+.proto-https { color: var(--purple); }
+.proto-http  { color: var(--red); }
+
+/* ── NODE MANAGER ── */
+.node-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.node-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; position: relative;
+}
+.node-card.online  { border-top: 2px solid var(--green); }
+.node-card.offline { border-top: 2px solid var(--border2); opacity: 0.6; }
+.node-card.warning { border-top: 2px solid var(--orange); }
+.node-dot {
+  position: absolute; top: 14px; right: 14px;
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.online  .node-dot { background: var(--green);  animation: blink 2s infinite; }
+.offline .node-dot { background: var(--text3); }
+.warning .node-dot { background: var(--orange); animation: blink 1s infinite; }
+.node-id  { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+.node-ip  { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); margin: 3px 0 10px; }
+.node-row { display: flex; gap: 14px; }
+.node-stat { font-size: 11px; color: var(--text3); }
+.node-stat span { font-weight: 600; color: var(--text); }

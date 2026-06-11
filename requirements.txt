@@ -1,0 +1,8 @@
+flask
+flask-cors
+cryptography
+pycryptodome
+pytest
+uvicorn
+fastapi
+sqlalchemy
