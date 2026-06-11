@@ -124,6 +124,17 @@ SENTRA/
 * Incident Response Teams
 * Collaborative Cyber Defense Networks
 
+## Project Team
+
+SENTRA was developed as a collaborative cybersecurity project by:
+
+- **Ganesh Palav**
+- **Aditya Gupta**
+- **Aditya Bankar**
+- **Pratik Jingare**
+
+Each team member contributed to the design, development, testing, and implementation of the Distributed Threat Intelligence Sharing System.
+
 ## Author
 
 **Ganesh**
