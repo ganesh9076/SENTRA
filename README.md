@@ -135,11 +135,12 @@ SENTRA was developed as a collaborative cybersecurity project by:
 
 Each team member contributed to the design, development, testing, and implementation of the Distributed Threat Intelligence Sharing System.
 
-## Author
+## Authors
 
-**Ganesh**
-
-* GitHub: https://github.com/ganesh9076
+* **Ganesh** — GitHub: https://github.com/ganesh9076
+* **Aditya Bankar** — GitHub: https://github.com/Aditya-Bankar
+* **Aditya Gupta** — GitHub: https://github.com/adityagupta-design
+* **Pratik Jingare** — GitHub: https://github.com/pratikjingare-ctrl
 
 ## License
 
