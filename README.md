@@ -4,6 +4,7 @@
 
 SENTRA is a Distributed Threat Intelligence Sharing System designed to facilitate the collection, analysis, and sharing of cybersecurity threat intelligence across multiple nodes. The platform enables organizations and security teams to collaboratively identify, monitor, and respond to emerging cyber threats in real time.
 
+
 By leveraging a distributed architecture, SENTRA improves threat visibility, accelerates incident response, and enhances collective cyber defense capabilities.
 
 ## Key Features
