@@ -137,7 +137,7 @@ Each team member contributed to the design, development, testing, and implementa
 
 ## Authors
 
-* **Ganesh** — GitHub: https://github.com/ganesh9076
+* **Ganesh Palav** — GitHub: https://github.com/ganesh9076
 * **Aditya Bankar** — GitHub: https://github.com/Aditya-Bankar
 * **Aditya Gupta** — GitHub: https://github.com/adityagupta-design
 * **Pratik Jingare** — GitHub: https://github.com/pratikjingare-ctrl
